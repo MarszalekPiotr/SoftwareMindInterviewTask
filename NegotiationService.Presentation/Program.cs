@@ -27,6 +27,12 @@ namespace NegotiationService.Presentation
         };
     });
 
+
+            // 🔥 Add Authentication Service
+
+
+
+
             // 🔥 Add Authorization Service
             builder.Services.AddAuthorization();
 
