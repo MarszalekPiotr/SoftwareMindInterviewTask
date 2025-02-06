@@ -20,9 +20,11 @@ namespace NegotiationService.Infrastructure.Services
         private readonly IConfiguration _config;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        public AuthService(IConfiguration config)
+        public AuthService(IConfiguration config, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _config = config;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
         private string CreateToken(string userId)
         {
