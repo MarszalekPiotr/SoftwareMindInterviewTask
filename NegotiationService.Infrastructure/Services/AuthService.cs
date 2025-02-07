@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace NegotiationService.Infrastructure.Services
 {
-    public  class AuthService : IAuthService
+    public class AuthService : IAuthService
     {
         private const string UserIdClaim = "UserId";
         private readonly IConfiguration _config;
@@ -32,10 +32,11 @@ namespace NegotiationService.Infrastructure.Services
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
-            {
-            new Claim(UserIdClaim, userId),
-            
-        };
+{
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(JwtRegisteredClaimNames.Sub, userId),
+        new Claim(ClaimTypes.NameIdentifier, userId) // This is often required
+         };
 
             var token = new JwtSecurityToken(
                 _config["Jwt:Issuer"],
