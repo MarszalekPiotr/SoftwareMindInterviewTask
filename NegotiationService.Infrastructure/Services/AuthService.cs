@@ -17,18 +17,18 @@ using System.Threading.Tasks;
 namespace NegotiationService.Infrastructure.Services
 {
     public class AuthService : IAuthService
-    {    
+    {
         private readonly UserManager<User> _userManager;
-        private readonly  IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public AuthService(UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async  Task<User> GetCurrentUser()
+        public async Task<User> GetCurrentUser()
         {
             var claimUser = _httpContextAccessor.HttpContext.User;
-            if(claimUser == null)
+            if (claimUser == null)
             {
                 return null;
             }
@@ -38,6 +38,7 @@ namespace NegotiationService.Infrastructure.Services
 
         public async Task<User> GetUserById(string userId)
         {
-             return await _userManager.FindByIdAsync(userId);
+            return await _userManager.FindByIdAsync(userId);
         }
     }
+}
