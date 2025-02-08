@@ -20,6 +20,12 @@ namespace NegotiationService.Infrastructure.Persistance.Configuration
                 .WithOne(e => e.Product)
                 .HasForeignKey(e => e.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            builder.HasOne(e => e.User)
+                .WithMany(e => e.Products)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

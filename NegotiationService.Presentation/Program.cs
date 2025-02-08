@@ -85,6 +85,7 @@ namespace NegotiationService.Presentation
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+                //context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
             }
 

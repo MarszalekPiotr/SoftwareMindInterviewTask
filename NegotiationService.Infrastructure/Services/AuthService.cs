@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,14 +25,19 @@ namespace NegotiationService.Infrastructure.Services
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
-        public Task<User> GetCurrentUser()
+        public async  Task<User> GetCurrentUser()
         {
             var claimUser = _httpContextAccessor.HttpContext.User;
             if(claimUser == null)
             {
                 return null;
             }
-            return _userManager.FindByNameAsync(claimUser.Identity.Name);
+            Console.WriteLine(claimUser.Identity.Name.ToString());
+            return await _userManager.FindByEmailAsync(claimUser.Identity.Name.ToString());
+        }
+
+        public async Task<User> GetUserById(string userId)
+        {
+             return await _userManager.FindByIdAsync(userId);
         }
     }
-}

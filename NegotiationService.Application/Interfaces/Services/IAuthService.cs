@@ -12,5 +12,6 @@ namespace NegotiationService.Application.Interfaces.Services
     {
 
         Task<User> GetCurrentUser();
+        Task<User> GetUserById( string userId );
     }
 }

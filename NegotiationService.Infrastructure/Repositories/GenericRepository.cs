@@ -1,4 +1,5 @@
-﻿using NegotiationService.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using NegotiationService.Application.Interfaces;
 using NegotiationService.Domain.Entities;
 using NegotiationService.Infrastructure.Persistance;
 using System;
@@ -34,7 +35,7 @@ namespace NegotiationService.Infrastructure.Repositories
 
         public async Task<TEntity> GetByIdAsync(int id)
         {
-           return await _context.Set<TEntity>().FindAsync(id);
+           return await _context.Set<TEntity>().FirstOrDefaultAsync( e => e.Id == id);
         }
 
         public async Task SaveChangesAsync()

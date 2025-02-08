@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NegotiationService.Application.Logic.Product.Handlers;
 using NegotiationService.Application.Logic.Product.Validators;
+using NegotiationService.Application.Logic.Abstract;
 
 namespace NegotiationService.Application.Extensions
 {
@@ -16,6 +17,7 @@ namespace NegotiationService.Application.Extensions
     {
         public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddTransient < BaseCommandHandler >();
             services.AddTransient<ProductCommandHandler>();
             services.AddTransient<ProductQueryHandler>();
             services.AddTransient<ProductValidator>();

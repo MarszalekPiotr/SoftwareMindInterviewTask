@@ -33,7 +33,7 @@ namespace NegotiationService.Application.Logic.Product.Handlers
                  Description = p.Description,
                  Price = p.Price,
                  Quantity = p.Quantity,
-                 Owner = p.User.Name
+                 Owner = p.User.UserName
              }).ToListAsync();
 
             return new GetProductListResult()
@@ -42,6 +42,30 @@ namespace NegotiationService.Application.Logic.Product.Handlers
             };
 
 
+        }
+
+        public async Task<GetProductResult> Handle(GetProductRequest request)
+        {
+            var product = await _productRepository.GetByIdAsync(request.ProductId);
+            if (product == null)
+            {
+                throw new Exception("Product not found");
+            }
+
+            var owner = await _authService.GetUserById(product.UserId);
+            var productDto = new ProductDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Quantity = product.Quantity,
+                Owner = owner.UserName
+            };
+            return new GetProductResult()
+            {
+                ProductDTO = productDto
+            };
         }
 
 

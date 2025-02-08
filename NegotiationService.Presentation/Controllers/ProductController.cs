@@ -28,12 +28,12 @@ namespace NegotiationService.Presentation.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-
-            return Ok();
+            var result = _productQueryHandler.Handle(new GetProductRequest() { ProductId = id });
+            return Ok(result);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts(GetProductListRequest request)
+        public async Task<IActionResult> GetProducts([FromQuery]GetProductListRequest request)
         {
             var result = await _productQueryHandler.Handle(request);
             return Ok(result); 
