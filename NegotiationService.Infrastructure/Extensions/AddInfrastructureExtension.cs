@@ -13,6 +13,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using NegotiationService.Application.Interfaces;
+using NegotiationService.Infrastructure.Repositories;
 
 namespace NegotiationService.Infrastructure.Extensions
 {
@@ -22,6 +24,7 @@ namespace NegotiationService.Infrastructure.Extensions
         {
 
             services.AddTransient<IAuthService, AuthService>();
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         }
     }
 }

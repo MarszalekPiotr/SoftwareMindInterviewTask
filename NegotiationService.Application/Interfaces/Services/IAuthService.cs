@@ -1,4 +1,4 @@
-﻿using NegotiationService.Application.Logic.RequestsDTO;
+﻿
 using NegotiationService.Domain.Entities;
 using System;
 using System.Collections.Generic;

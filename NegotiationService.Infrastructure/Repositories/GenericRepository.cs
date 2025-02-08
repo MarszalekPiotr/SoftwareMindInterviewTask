@@ -1,5 +1,6 @@
 ﻿using NegotiationService.Application.Interfaces;
 using NegotiationService.Domain.Entities;
+using NegotiationService.Infrastructure.Persistance;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,39 +11,40 @@ namespace NegotiationService.Infrastructure.Repositories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
     {     
-        public GenericRepository()
+        private readonly MainDbContext _context;
+        public GenericRepository(MainDbContext context)
         {
-
+            _context = context;
         }
 
         public void Add(TEntity entity)
         {
-            throw new NotImplementedException();
+            _context.Add(entity);
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            _context.Remove(id);    
         }
 
-        public Task<IQueryable<TEntity>> GetAllAsync()
+        public IQueryable<TEntity> GetAll()
         {
-            throw new NotImplementedException();
+            return _context.Set<TEntity>().AsQueryable();
         }
 
-        public Task<TEntity> GetByIdAsync(int id)
+        public async Task<TEntity> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+           return await _context.Set<TEntity>().FindAsync(id);
         }
 
-        public Task SaveChangesAsync()
+        public async Task SaveChangesAsync()
         {
-            throw new NotImplementedException();
+           await _context.SaveChangesAsync();
         }
 
         public void Update(TEntity entity)
         {
-            throw new NotImplementedException();
+            _context.Set<TEntity>().Update(entity);
         }
     }
 }

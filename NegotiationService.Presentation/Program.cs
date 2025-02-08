@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NegotiationService.Application.Extensions;
 using NegotiationService.Domain.Entities;
 using NegotiationService.Infrastructure.Extensions;
 using NegotiationService.Infrastructure.Persistance;
@@ -63,6 +64,8 @@ namespace NegotiationService.Presentation
         }
     });
             });
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddApplication(builder.Configuration);
             builder.Services.AddInfrastructure(builder.Configuration);
 
             var app = builder.Build();

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NegotiationService.Application.Interfaces.Services;
-using NegotiationService.Application.Logic.RequestsDTO;
+
 using NegotiationService.Domain.Entities;
 using System;
 using System.Collections.Generic;

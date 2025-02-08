@@ -18,7 +18,8 @@ namespace NegotiationService.Application.Logic.Product.Handlers
         private readonly IGenericRepository<Domain.Entities.Product> _productRepository;
         private readonly ProductValidator _validator;
         public ProductCommandHandler(IAuthService authService,
-            IGenericRepository<Domain.Entities.Product> repository, IGenericRepository<Domain.Entities.Product> productRepository, ProductValidator validator)
+            IGenericRepository<Domain.Entities.Product> repository, IGenericRepository<Domain.Entities.Product> productRepository, 
+            ProductValidator validator)
             : base(authService)
         {
             _productRepository = productRepository;

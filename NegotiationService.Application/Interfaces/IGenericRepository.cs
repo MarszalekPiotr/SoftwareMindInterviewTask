@@ -11,7 +11,7 @@ namespace NegotiationService.Application.Interfaces
     public  interface IGenericRepository<TEntity> 
     {
         Task<TEntity> GetByIdAsync(int id);
-        Task<IQueryable<TEntity>> GetAllAsync();
+        IQueryable<TEntity> GetAll();
         void Add(TEntity entity);
         void Update(TEntity entity);
         void Delete(int id);
