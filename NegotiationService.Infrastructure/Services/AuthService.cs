@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NegotiationService.Application.Interfaces.Services;
@@ -15,71 +16,22 @@ using System.Threading.Tasks;
 namespace NegotiationService.Infrastructure.Services
 {
     public class AuthService : IAuthService
-    {
-        private const string UserIdClaim = "UserId";
-        private readonly IConfiguration _config;
+    {    
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        public AuthService(IConfiguration config, UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly  IHttpContextAccessor _httpContextAccessor;
+        public AuthService(UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
         {
-            _config = config;
             _userManager = userManager;
-            _signInManager = signInManager;
+            _httpContextAccessor = httpContextAccessor;
         }
-        private string CreateToken(string userId)
+        public Task<User> GetCurrentUser()
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-{
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(JwtRegisteredClaimNames.Sub, userId),
-        new Claim(ClaimTypes.NameIdentifier, userId) // This is often required
-         };
-
-            var token = new JwtSecurityToken(
-                _config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
-                claims,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public async Task<string> Login(LoginRequestDTO loginRequest)
-        {
-            var user = await _userManager.FindByEmailAsync(loginRequest.Email);
-            if (user == null)
+            var claimUser = _httpContextAccessor.HttpContext.User;
+            if(claimUser == null)
             {
-                throw new Exception("User not found");
+                return null;
             }
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, false);
-            if (result.Succeeded)
-            {
-                return CreateToken(user.Id);
-            }
-            throw new Exception("Invalid login or password");
+            return _userManager.FindByNameAsync(claimUser.Identity.Name);
         }
-
-        public async Task<string> Register(RegisterRequestDTO registerRequest)
-        {
-            var user = new User
-            {
-                UserName = registerRequest.Email,
-                Email = registerRequest.Email,
-                Name = registerRequest.Name,
-                Description = registerRequest.Description
-            };
-            var result = await _userManager.CreateAsync(user, registerRequest.Password);
-            if (result.Succeeded)
-            {
-                return CreateToken(user.Id);
-            }
-            throw new Exception("User not created");
-        }
-
-
     }
 }

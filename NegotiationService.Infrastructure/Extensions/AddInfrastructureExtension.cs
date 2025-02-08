@@ -21,11 +21,6 @@ namespace NegotiationService.Infrastructure.Extensions
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
 
-            
-           
-
-          
-
             services.AddTransient<IAuthService, AuthService>();
         }
     }

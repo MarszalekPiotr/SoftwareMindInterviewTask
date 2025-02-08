@@ -1,4 +1,5 @@
 ﻿using NegotiationService.Application.Logic.RequestsDTO;
+using NegotiationService.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,7 @@ namespace NegotiationService.Application.Interfaces.Services
 {
     public interface IAuthService
     {
-       
-        Task<string> Login(LoginRequestDTO loginRequest);
-        Task<string> Register(RegisterRequestDTO registerRequest);
+
+        Task<User> GetCurrentUser();
     }
 }
