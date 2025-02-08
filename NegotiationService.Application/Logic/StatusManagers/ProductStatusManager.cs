@@ -28,9 +28,9 @@ namespace NegotiationService.Application.Logic.StatusManagers
                 return false;
             }
 
-            var soldProductsQuantity =  GetAvailableQuantity(productId);
+            var availableQuantity =  await GetAvailableQuantity(productId);
 
-            if (!(soldProductsQuantity < product.Quantity))
+            if ((  0 > availableQuantity))
             {
                 messages.Add("Product is not available");
                 return false;
@@ -45,11 +45,13 @@ namespace NegotiationService.Application.Logic.StatusManagers
 
         public async Task<int> GetAvailableQuantity(int productId)
         {
-            var product = _productRepository.GetByIdAsync(productId).Result;
+            var product = await _productRepository.GetByIdAsync(productId);
             if (product == null)
             {
                 return 0;
             }
+            var test = _purchaseOfferRepository.GetAll().ToList();
+
             var soldProductsQuantity = await _purchaseOfferRepository.GetAll().Where(po => po.ProductId == productId)
                 .Where(po => po.Status == Domain.Enums.EnumOfferStatus.Accepted)
                 .SumAsync(po => po.Quantity);

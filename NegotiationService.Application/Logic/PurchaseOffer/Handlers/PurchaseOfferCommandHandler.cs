@@ -16,18 +16,21 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
     public class PurchaseOfferCommandHandler : BaseCommandHandler
     {
         private readonly IGenericRepository<Domain.Entities.PurchaseOffer> _purchaseOfferRepository;
+        IGenericRepository<Domain.Entities.Product> _productRepository;
         private readonly PurchaseOfferValidator _validator;
         private readonly TransactionStatusManager _transactionStatusManager;
         private readonly ProductStatusManager _productStatusManager;
-        public PurchaseOfferCommandHandler(IAuthService authService, IGenericRepository<Domain.Entities.PurchaseOffer> purchaseOfferRepository, PurchaseOfferValidator validator, TransactionStatusManager transactionStatusManager, ProductStatusManager productStatusManager) : base(authService)
+      
+        public PurchaseOfferCommandHandler(IAuthService authService, IGenericRepository<Domain.Entities.PurchaseOffer> purchaseOfferRepository, PurchaseOfferValidator validator, TransactionStatusManager transactionStatusManager, ProductStatusManager productStatusManager, IGenericRepository<Domain.Entities.Product> productRepository) : base(authService)
         {
             _purchaseOfferRepository = purchaseOfferRepository;
             _validator = validator;
             _transactionStatusManager = transactionStatusManager;
             _productStatusManager = productStatusManager;
+            _productRepository = productRepository;
         }
 
-        public async Task<CreatePurchaseOfferResult> CreatePurchaseOffer(CreatePurchaseOfferRequest request)
+        public async Task<CreatePurchaseOfferResult> Handle(CreatePurchaseOfferRequest request)
         {
             _validator.Validate(request);
 
@@ -64,7 +67,7 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
                 Price = request.Price,
                 CustomerEmail = request.CustomerEmail,
                 Status = Domain.Enums.EnumOfferStatus.Pending,
-                CreatedDate = DateTimeOffset.Now
+                CreatedDate = DateTimeOffset.UtcNow
                 
 
 
@@ -74,6 +77,64 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
             await _purchaseOfferRepository.SaveChangesAsync();
 
             return new CreatePurchaseOfferResult()
+            {
+                PurchaseOfferId = purchaseOffer.Id
+            };
+        }
+
+        public async Task<UpdatePurchaseOfferStatusResult> Handle(UpdatePurchaseOfferStatusRequest request)
+        {    
+            var purchaseOffer = await _purchaseOfferRepository.GetByIdAsync(request.PurchaseOfferId);
+            var product = _productRepository.GetAll().FirstOrDefault(p => p.Id == purchaseOffer.ProductId);
+            var currentUser = await _authService.GetCurrentUser();
+            if (purchaseOffer == null)
+            {
+                throw new Exception("Purchase offer not found");
+            }
+            if (product == null) {
+                throw new Exception("Product not found");
+            }
+            if (product.UserId != currentUser.Id )
+            {
+                throw new AccessViolationException("You are not the owner of this product");    
+            }
+
+            var errorMessages = new List<string>();
+            if (request.Status == Domain.Enums.EnumOfferStatus.Accepted)
+            {
+
+                var transactionPossible = await _transactionStatusManager.CheckTransactionConsistency(product.Id,
+                    purchaseOffer.Quantity, errorMessages);
+                if (!transactionPossible)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    errorMessages.ForEach(x =>
+                    {
+                        sb.AppendLine(x);
+                    });
+                    throw new Exception(sb.ToString());
+
+                }
+
+                purchaseOffer.Status = Domain.Enums.EnumOfferStatus.Accepted;
+                // notify customer
+            }
+            else if (request.Status == Domain.Enums.EnumOfferStatus.Rejected)
+            {    
+                if(purchaseOffer.Status == Domain.Enums.EnumOfferStatus.Accepted)
+                {
+                    throw new Exception("You can't reject an offer that hs already been  accepted");
+                }
+                purchaseOffer.Status = Domain.Enums.EnumOfferStatus.Rejected;
+            }
+            else
+            {
+                throw new Exception("Invalid status");
+            }
+
+            await _purchaseOfferRepository.SaveChangesAsync();
+
+            return new UpdatePurchaseOfferStatusResult()
             {
                 PurchaseOfferId = purchaseOffer.Id
             };

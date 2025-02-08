@@ -33,10 +33,10 @@ namespace NegotiationService.Presentation.Controllers
             
             var command = new UpdatePurchaseOfferStatusRequest()
             {
-                OfferId = offerId,
+                PurchaseOfferId = offerId,
                 Status = request.Status
             };
-            var result = await _purchaseOfferCommandHandler.Handle(request);
+            var result = await _purchaseOfferCommandHandler.Handle(command);
             return Ok(result);
         }
     }

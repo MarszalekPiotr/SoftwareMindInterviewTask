@@ -19,6 +19,7 @@ namespace NegotiationService.Application.Logic.StatusManagers
             _productStatusManager = productStatusManager;
         }
 
+
         public async Task<bool> CheckTransactionAvailability(CreatePurchaseOfferRequest request, List<string> messages)
         {    
 
@@ -30,37 +31,59 @@ namespace NegotiationService.Application.Logic.StatusManagers
             if(offersCount >= TransactionSettings.MaxOffersAmount)
             {
                 messages.Add("You have reached the maximum number of offers for this product");
-                return false  ; 
+                return false; 
 
             }
 
-            var lastOffer = await _purchaseOfferRepository.GetAll().
+            var customerOffers = await _purchaseOfferRepository.GetAll().
                 Where(x => x.ProductId == request.ProductId && x.CustomerEmail == request.CustomerEmail)
-                .OrderByDescending(x => x.CreatedDate)
-                .FirstOrDefaultAsync();
-
-            if (DateTimeOffset.UtcNow.Subtract(lastOffer.CreatedDate).Hours > TransactionSettings.MaxAnswerDelayInHours)
+                .ToListAsync();
+            if(customerOffers.Any(off => off.Status == Domain.Enums.EnumOfferStatus.Accepted))
             {
-                messages.Add("You have reached the maximum time to answer the offer");
+                messages.Add("you have already made a purchase");
                 return false;
+                
             }
 
-            if (TransactionSettings.notValidStatusMessages.ContainsKey(lastOffer.Status))
+            if (customerOffers.Any())
             {
-                messages.Add(TransactionSettings.notValidStatusMessages[lastOffer.Status]);
-                return false;
-            }
+                var lastOffer = customerOffers
+                    .OrderByDescending(x => x.CreatedDate)
+                    .FirstOrDefault();
 
-            var availableQuantity = await _productStatusManager.GetAvailableQuantity(request.ProductId);
-            if (request.Quantity > availableQuantity)
-            {
+                if (DateTimeOffset.UtcNow.Subtract(lastOffer.CreatedDate).Minutes> TransactionSettings.MaxAnswerDelayInMinutes)
+                {
+                    messages.Add("You have reached the maximum time to answer the offer");
+                    return false;
+                }
+
+                if (TransactionSettings.notValidStatusMessages.ContainsKey(lastOffer.Status))
+                {
+                    messages.Add(TransactionSettings.notValidStatusMessages[lastOffer.Status]);
+                    return false;
+                }
+            }
+             var consistencyResult = await CheckTransactionConsistency(request.ProductId, request.Quantity, messages);
+            if (!consistencyResult)
+            {    
                 messages.Add("The quantity you are trying to buy is not available");
                 return false;
             }
 
+                return true;
 
+
+        }
+
+        public async Task<bool> CheckTransactionConsistency(int productId,int quantity, List<string> messages)
+        {
+            var availableQuantity = await _productStatusManager.GetAvailableQuantity(productId);
+            if (quantity > availableQuantity)
+            {
+                messages.Add("The quantity exceeds the available product amount");
+                return false;
+            }
             return true;
-
 
         }
     }

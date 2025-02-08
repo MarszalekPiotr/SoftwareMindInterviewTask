@@ -10,7 +10,7 @@ namespace NegotiationService.Application.Logic
     public static class TransactionSettings
     {
         public static int MaxOffersAmount => 3;
-        public static int MaxAnswerDelayInHours => 24 * 7;
+        public static int MaxAnswerDelayInMinutes => 1; // * 24 * 60 * 7
 
         public static Dictionary<EnumOfferStatus, string> notValidStatusMessages = new Dictionary<EnumOfferStatus, string>
         {

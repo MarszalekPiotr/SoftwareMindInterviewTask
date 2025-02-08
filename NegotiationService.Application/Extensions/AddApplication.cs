@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using NegotiationService.Application.Logic.Product.Handlers;
 using NegotiationService.Application.Logic.Product.Validators;
 using NegotiationService.Application.Logic.Abstract;
+using NegotiationService.Application.Logic.PurchaseOffer.Handlers;
+using NegotiationService.Application.Logic.PurchaseOffer.Validators;
+using NegotiationService.Application.Logic.StatusManagers;
 
 namespace NegotiationService.Application.Extensions
 {
@@ -21,6 +24,14 @@ namespace NegotiationService.Application.Extensions
             services.AddTransient<ProductCommandHandler>();
             services.AddTransient<ProductQueryHandler>();
             services.AddTransient<ProductValidator>();
+
+
+            services.AddTransient<PurchaseOfferCommandHandler>();
+            services.AddTransient<PurchaseOfferValidator>();
+
+            services.AddTransient<ProductStatusManager>();
+            services.AddTransient<TransactionStatusManager>();
+
 
             return services;
 
