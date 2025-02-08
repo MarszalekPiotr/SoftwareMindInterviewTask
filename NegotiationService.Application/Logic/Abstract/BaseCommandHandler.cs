@@ -1,4 +1,6 @@
-﻿using NegotiationService.Application.Interfaces.Services;
+﻿using NegotiationService.Application.Interfaces;
+using NegotiationService.Application.Interfaces.Services;
+using NegotiationService.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +11,12 @@ namespace NegotiationService.Application.Logic.Abstract
 {
     public  class BaseCommandHandler
     {    
-        private readonly IAuthService authService;
-        public BaseCommandHandler()
+        public readonly IAuthService _authService;
+        ;
+        public BaseCommandHandler(IAuthService authService)
         {
+            _authService = authService;
+            
         }
     }
 }

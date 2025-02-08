@@ -15,6 +15,10 @@ namespace NegotiationService.Infrastructure.Persistance
         public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
         {
         }
+
+        DbSet<Product> Products { get; set; }
+        DbSet<PurchaseOffer> PurchaseOffers { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
