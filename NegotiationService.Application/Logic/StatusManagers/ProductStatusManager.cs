@@ -30,15 +30,11 @@ namespace NegotiationService.Application.Logic.StatusManagers
 
             var availableQuantity =  await GetAvailableQuantity(productId);
 
-            if ((  0 > availableQuantity))
+            if ((availableQuantity < 0))
             {
                 messages.Add("Product is not available");
                 return false;
             }
-
-
-
-
             return true;
             
         }
@@ -50,7 +46,7 @@ namespace NegotiationService.Application.Logic.StatusManagers
             {
                 return 0;
             }
-            var test = _purchaseOfferRepository.GetAll().ToList();
+            
 
             var soldProductsQuantity = await _purchaseOfferRepository.GetAll().Where(po => po.ProductId == productId)
                 .Where(po => po.Status == Domain.Enums.EnumOfferStatus.Accepted)

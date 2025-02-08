@@ -24,26 +24,9 @@ namespace NegotiationService.Application.Logic.StatusManagers
         {    
 
 
-            var offersCount = await _purchaseOfferRepository.GetAll()
-                .Where(x => x.ProductId == request.ProductId && x.CustomerEmail == request.CustomerEmail)
-                .CountAsync();
-
-            if(offersCount >= TransactionSettings.MaxOffersAmount)
-            {
-                messages.Add("You have reached the maximum number of offers for this product");
-                return false; 
-
-            }
-
             var customerOffers = await _purchaseOfferRepository.GetAll().
                 Where(x => x.ProductId == request.ProductId && x.CustomerEmail == request.CustomerEmail)
-                .ToListAsync();
-            if(customerOffers.Any(off => off.Status == Domain.Enums.EnumOfferStatus.Accepted))
-            {
-                messages.Add("you have already made a purchase");
-                return false;
-                
-            }
+                .ToListAsync();           
 
             if (customerOffers.Any())
             {
@@ -51,28 +34,40 @@ namespace NegotiationService.Application.Logic.StatusManagers
                     .OrderByDescending(x => x.CreatedDate)
                     .FirstOrDefault();
 
-                if (DateTimeOffset.UtcNow.Subtract(lastOffer.CreatedDate).Minutes> TransactionSettings.MaxAnswerDelayInMinutes)
-                {
-                    messages.Add("You have reached the maximum time to answer the offer");
-                    return false;
-                }
 
                 if (TransactionSettings.notValidStatusMessages.ContainsKey(lastOffer.Status))
                 {
                     messages.Add(TransactionSettings.notValidStatusMessages[lastOffer.Status]);
                     return false;
                 }
+
+
+                if (customerOffers.Count >= TransactionSettings.MaxOffersAmount)
+                {
+                    messages.Add("You have reached the maximum number of offers for this product");
+                    return false;
+
+                }
+
+
+                if (DateTimeOffset.UtcNow.Subtract(lastOffer.CreatedDate).Minutes> TransactionSettings.MaxAnswerDelayInMinutes)
+                {
+                    messages.Add("You have reached the maximum time to answer the offer");
+                    return false;
+                }
+
+               
+
+
             }
-             var consistencyResult = await CheckTransactionConsistency(request.ProductId, request.Quantity, messages);
+            var consistencyResult = await CheckTransactionConsistency(request.ProductId, request.Quantity, messages);
             if (!consistencyResult)
             {    
-                messages.Add("The quantity you are trying to buy is not available");
+                messages.Add("The transaction is not possible");
                 return false;
             }
 
                 return true;
-
-
         }
 
         public async Task<bool> CheckTransactionConsistency(int productId,int quantity, List<string> messages)
@@ -80,7 +75,7 @@ namespace NegotiationService.Application.Logic.StatusManagers
             var availableQuantity = await _productStatusManager.GetAvailableQuantity(productId);
             if (quantity > availableQuantity)
             {
-                messages.Add("The quantity exceeds the available product amount");
+                messages.Add("The quantity exceeds the available product's amount");
                 return false;
             }
             return true;
