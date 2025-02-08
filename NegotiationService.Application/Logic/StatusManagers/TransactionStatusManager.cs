@@ -23,7 +23,6 @@ namespace NegotiationService.Application.Logic.StatusManagers
         public async Task<bool> CheckTransactionAvailability(CreatePurchaseOfferRequest request, List<string> messages)
         {    
 
-
             var customerOffers = await _purchaseOfferRepository.GetAll().
                 Where(x => x.ProductId == request.ProductId && x.CustomerEmail == request.CustomerEmail)
                 .ToListAsync();           

@@ -123,7 +123,7 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
             {    
                 if(purchaseOffer.Status == Domain.Enums.EnumOfferStatus.Accepted)
                 {
-                    throw new Exception("You can't reject an offer that hs already been  accepted");
+                    throw new Exception("You can't reject an offer that hss already been  accepted");
                 }
                 purchaseOffer.Status = Domain.Enums.EnumOfferStatus.Rejected;
             }
