@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NegotiationService.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,8 @@ namespace NegotiationService.Domain.Entities
         public int Quantity { get; set; }
         public int ProductId { get; set; }
         public Product Product { get; set; }
-        public string customerEmail { get; set; }
-       
+        public string CustomerEmail { get; set; }
+        public EnumOfferStatus Status { get; set; }
+        public DateTimeOffset CreatedDate { get; set; }
     }
 }
