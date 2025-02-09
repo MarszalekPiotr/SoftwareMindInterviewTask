@@ -20,14 +20,16 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
         private readonly PurchaseOfferValidator _validator;
         private readonly TransactionStatusManager _transactionStatusManager;
         private readonly ProductStatusManager _productStatusManager;
-      
-        public PurchaseOfferCommandHandler(IAuthService authService, IGenericRepository<Domain.Entities.PurchaseOffer> purchaseOfferRepository, PurchaseOfferValidator validator, TransactionStatusManager transactionStatusManager, ProductStatusManager productStatusManager, IGenericRepository<Domain.Entities.Product> productRepository) : base(authService)
+        private readonly IStatusUpdateService _statusUpdateService;
+
+        public PurchaseOfferCommandHandler(IAuthService authService, IGenericRepository<Domain.Entities.PurchaseOffer> purchaseOfferRepository, PurchaseOfferValidator validator, TransactionStatusManager transactionStatusManager, ProductStatusManager productStatusManager, IGenericRepository<Domain.Entities.Product> productRepository, IStatusUpdateService statusUpdateService) : base(authService)
         {
             _purchaseOfferRepository = purchaseOfferRepository;
             _validator = validator;
             _transactionStatusManager = transactionStatusManager;
             _productStatusManager = productStatusManager;
             _productRepository = productRepository;
+            _statusUpdateService = statusUpdateService;
         }
 
         public async Task<CreatePurchaseOfferResult> Handle(CreatePurchaseOfferRequest request)
@@ -39,25 +41,19 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
 
 
             var productAvailability = await _productStatusManager.CheckAvailability(request.ProductId, errorMessages);
-            if (!productAvailability)
-            {
-                errorMessages.ForEach(x =>
+            
+               if (!productAvailability)
                 {
-                    sb.AppendLine(x);
-                });
-
-                throw new Exception(sb.ToString());
-            }
+                    throw new Exception(string.Join(Environment.NewLine, errorMessages));
+                }
+                
+                
 
             var purchaseOfferPossible = await _transactionStatusManager.CheckTransactionAvailability(request, errorMessages);
 
             if (!purchaseOfferPossible)
             {
-                errorMessages.ForEach(x =>
-                {
-                    sb.AppendLine(x);
-                });
-                throw new Exception(sb.ToString());
+                throw new Exception(string.Join(Environment.NewLine, errorMessages));
             }
 
             var purchaseOffer = new Domain.Entities.PurchaseOffer()
@@ -94,45 +90,19 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
             if (product == null) {
                 throw new Exception("Product not found");
             }
-            if (product.UserId != currentUser.Id )
+            if (currentUser == null || product.UserId != currentUser.Id )
             {
                 throw new AccessViolationException("You are not the owner of this product");    
             }
 
-            var errorMessages = new List<string>();
-            if (request.Status == Domain.Enums.EnumOfferStatus.Accepted)
+            try
             {
-
-                var transactionPossible = await _transactionStatusManager.CheckTransactionConsistency(product.Id,
-                    purchaseOffer.Quantity, errorMessages);
-                if (!transactionPossible)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    errorMessages.ForEach(x =>
-                    {
-                        sb.AppendLine(x);
-                    });
-                    throw new Exception(sb.ToString());
-
-                }
-
-                purchaseOffer.Status = Domain.Enums.EnumOfferStatus.Accepted;
-                // notify customer
+                _statusUpdateService.UpdateStatus(purchaseOffer, product, request.Status, _purchaseOfferRepository);
             }
-            else if (request.Status == Domain.Enums.EnumOfferStatus.Rejected)
-            {    
-                if(purchaseOffer.Status == Domain.Enums.EnumOfferStatus.Accepted)
-                {
-                    throw new Exception("You can't reject an offer that hss already been  accepted");
-                }
-                purchaseOffer.Status = Domain.Enums.EnumOfferStatus.Rejected;
-            }
-            else
+            catch(Exception e)
             {
-                throw new Exception("Invalid status");
+                throw;
             }
-
-            await _purchaseOfferRepository.SaveChangesAsync();
 
             return new UpdatePurchaseOfferStatusResult()
             {

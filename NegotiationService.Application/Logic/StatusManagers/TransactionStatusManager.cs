@@ -55,20 +55,14 @@ namespace NegotiationService.Application.Logic.StatusManagers
                     return false;
                 }
 
-               
-
 
             }
-            var consistencyResult = await CheckTransactionConsistency(request.ProductId, request.Quantity, messages);
-            if (!consistencyResult)
-            {    
-                messages.Add("The transaction is not possible");
-                return false;
-            }
+      
 
                 return true;
         }
 
+        [Obsolete]
         public async Task<bool> CheckTransactionConsistency(int productId,int quantity, List<string> messages)
         {
             var availableQuantity = await _productStatusManager.GetAvailableQuantity(productId);

@@ -19,8 +19,7 @@ namespace NegotiationService.Application.Logic.StatusManagers
         }
         public async Task<bool> CheckAvailability(int productId, List<string> messages)
         {
-             Console.WriteLine("");
-
+             
             var product = await _productRepository.GetByIdAsync(productId);
             if (product == null)
             {
@@ -28,17 +27,11 @@ namespace NegotiationService.Application.Logic.StatusManagers
                 return false;
             }
 
-            var availableQuantity =  await GetAvailableQuantity(productId);
-
-            if ((availableQuantity < 0))
-            {
-                messages.Add("Product is not available");
-                return false;
-            }
             return true;
             
         }
 
+        [Obsolete]
         public async Task<int> GetAvailableQuantity(int productId)
         {
             var product = await _productRepository.GetByIdAsync(productId);

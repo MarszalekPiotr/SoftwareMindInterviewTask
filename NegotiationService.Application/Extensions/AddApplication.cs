@@ -13,6 +13,7 @@ using NegotiationService.Application.Logic.Abstract;
 using NegotiationService.Application.Logic.PurchaseOffer.Handlers;
 using NegotiationService.Application.Logic.PurchaseOffer.Validators;
 using NegotiationService.Application.Logic.StatusManagers;
+using NegotiationService.Application.Logic.PurchaseOffer.StatusUpdate;
 
 namespace NegotiationService.Application.Extensions
 {
@@ -31,6 +32,8 @@ namespace NegotiationService.Application.Extensions
 
             services.AddTransient<ProductStatusManager>();
             services.AddTransient<TransactionStatusManager>();
+
+            services.AddTransient<IStatusUpdateService, StatusUpdateService>();
 
 
             return services;

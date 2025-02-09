@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using NegotiationService.Application.Interfaces;
 using NegotiationService.Domain.Entities;
 using NegotiationService.Infrastructure.Persistance;
@@ -13,6 +14,7 @@ namespace NegotiationService.Infrastructure.Repositories
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
     {     
         private readonly MainDbContext _context;
+        private IDbContextTransaction _transaction;
         public GenericRepository(MainDbContext context)
         {
             _context = context;
@@ -23,9 +25,30 @@ namespace NegotiationService.Infrastructure.Repositories
             _context.Add(entity);
         }
 
+        public async Task BeginTransactionAsync()
+        {
+            _transaction = await _context.Database.BeginTransactionAsync();
+        }
+
+        public async  Task CommitTransactionAsync()
+        {
+            if (_transaction != null)
+            {
+                await _context.SaveChangesAsync();
+                await _transaction.CommitAsync();
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
+        }
+
         public void Delete(int id)
         {
             _context.Remove(id);    
+        }
+
+        public async Task<int> ExecuteRawSqlAsync(string sql, params object[] parameters)
+        {
+            return await _context.Database.ExecuteSqlRawAsync(sql, parameters);
         }
 
         public IQueryable<TEntity> GetAll()
@@ -36,6 +59,16 @@ namespace NegotiationService.Infrastructure.Repositories
         public async Task<TEntity> GetByIdAsync(int id)
         {
            return await _context.Set<TEntity>().FirstOrDefaultAsync( e => e.Id == id);
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            if (_transaction != null)
+            {
+                await _transaction.RollbackAsync();
+                await _transaction.DisposeAsync();
+                _transaction = null;
+            }
         }
 
         public async Task SaveChangesAsync()
