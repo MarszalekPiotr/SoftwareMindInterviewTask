@@ -23,7 +23,7 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.StatusUpdate
         {
             if(purchaseOffer.Status == EnumOfferStatus.Accepted)
             {
-                throw new Exception("Offer already accepted");
+                throw new Exception("offer has been accepted already");
             }
 
             if(purchaseOffer.Quantity > product.Quantity)

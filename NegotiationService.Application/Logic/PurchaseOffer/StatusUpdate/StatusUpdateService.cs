@@ -41,7 +41,12 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.StatusUpdate
             {
                 throw new InvalidOperationException("Handler not found");
             }
-            handler.UpdateStatus(purchaseOffer, product,repository);
+         
+        
+                handler.UpdateStatus(purchaseOffer, product, repository);
+            
+      
+           
         }
     }
 }

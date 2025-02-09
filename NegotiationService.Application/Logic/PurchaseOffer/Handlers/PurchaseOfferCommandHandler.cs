@@ -36,7 +36,7 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
         {
             _validator.Validate(request);
 
-            StringBuilder sb = new StringBuilder();
+         
             List<string> errorMessages = new List<string>();
 
 
@@ -81,28 +81,28 @@ namespace NegotiationService.Application.Logic.PurchaseOffer.Handlers
         public async Task<UpdatePurchaseOfferStatusResult> Handle(UpdatePurchaseOfferStatusRequest request)
         {    
             var purchaseOffer = await _purchaseOfferRepository.GetByIdAsync(request.PurchaseOfferId);
-            var product = _productRepository.GetAll().FirstOrDefault(p => p.Id == purchaseOffer.ProductId);
-            var currentUser = await _authService.GetCurrentUser();
             if (purchaseOffer == null)
             {
                 throw new Exception("Purchase offer not found");
             }
-            if (product == null) {
+            var product = _productRepository.GetAll().FirstOrDefault(p => p.Id == purchaseOffer.ProductId);
+            if (product == null)
+            {
                 throw new Exception("Product not found");
             }
+            var currentUser = await _authService.GetCurrentUser();
+          
+            
             if (currentUser == null || product.UserId != currentUser.Id )
             {
                 throw new AccessViolationException("You are not the owner of this product");    
             }
 
-            try
-            {
+            
                 _statusUpdateService.UpdateStatus(purchaseOffer, product, request.Status, _purchaseOfferRepository);
-            }
-            catch(Exception e)
-            {
-                throw;
-            }
+           
+            
+          
 
             return new UpdatePurchaseOfferStatusResult()
             {

@@ -10,6 +10,7 @@ using NegotiationService.Application.Extensions;
 using NegotiationService.Domain.Entities;
 using NegotiationService.Infrastructure.Extensions;
 using NegotiationService.Infrastructure.Persistance;
+using NegotiationService.Presentation.Middlewares;
 using System.Security.Claims;
 using System.Text;
 
@@ -69,6 +70,8 @@ namespace NegotiationService.Presentation
             builder.Services.AddInfrastructure(builder.Configuration);
 
             var app = builder.Build();
+
+            app.UseMiddleware<ExceptionResultMiddleware>();
 
             // Configure the HTTP request pipeline.
 
