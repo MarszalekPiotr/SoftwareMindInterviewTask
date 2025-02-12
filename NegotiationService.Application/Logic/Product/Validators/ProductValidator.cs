@@ -15,7 +15,28 @@ namespace NegotiationService.Application.Logic.Product.Validators
 
         public void Validate(CreateProductRequest request)
         {
-            Console.WriteLine("");
+            List<string> errors = new List<string>();
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                errors.Add("Name is required");
+            }
+            if (string.IsNullOrEmpty(request.Description))
+            {
+                errors.Add("Description is required");
+            }
+            if(request.Price <= 0)
+            {
+                errors.Add("Price cannot be null or negative");
+            }
+            if(request.Quantity <= 0)
+            {
+                errors.Add("Quantity cannot be null or negative");
+            }
+
+            if (errors.Any())
+            {
+                throw new Exception(string.Join(Environment.NewLine, errors));    
+            }
         }
     }
 }
